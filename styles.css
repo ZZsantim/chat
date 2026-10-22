@@ -1,0 +1,181 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f0f2f5;
+}
+
+.oculto {
+  display: none !important;
+}
+
+input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #0b7a75;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #9bb;
+  cursor: not-allowed;
+}
+
+button.secundario {
+  padding: 6px 10px;
+  background: #888;
+}
+
+#login {
+  display: flex;
+  max-width: 320px;
+  margin: 80px auto;
+  padding: 24px;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab {
+  flex: 1;
+  background: #ddd;
+  color: #333;
+}
+
+.tab.activa {
+  background: #0b7a75;
+  color: #fff;
+}
+
+#msgError {
+  min-height: 1em;
+  margin: 0;
+  color: #c0392b;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+aside {
+  width: 290px;
+  padding: 16px;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+  background: #fff;
+}
+
+aside h3 {
+  margin: 16px 0 6px;
+  color: #666;
+  font-size: 13px;
+}
+
+aside ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+aside li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+aside li:hover,
+aside li.activo {
+  background: #e6f2f1;
+}
+
+#btnNuevaSala {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.punto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #aaa;
+}
+
+.punto.online {
+  background: #2ecc71;
+}
+
+#chat {
+  display: flex;
+  min-width: 0;
+  padding: 16px;
+  flex: 1;
+  flex-direction: column;
+}
+
+#chat h2 {
+  margin: 0;
+}
+
+#participantes {
+  margin: 4px 0 8px;
+  color: #666;
+  font-size: 13px;
+}
+
+#mensajes {
+  display: flex;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msg {
+  max-width: 70%;
+  padding: 8px 12px;
+  align-self: flex-start;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.msg.propio {
+  align-self: flex-end;
+  background: #d9f2ef;
+}
+
+.msg small {
+  display: block;
+  color: #777;
+  font-size: 11px;
+}
+
+#barra {
+  display: flex;
+  gap: 8px;
+}
+
+#barra input {
+  flex: 1;
+}

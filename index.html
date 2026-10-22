@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Chat Firestore</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section id="login">
+    <h1>Chat Firestore</h1>
+    <div class="tabs">
+      <button id="tabIngresar" class="tab activa">Ingresar</button>
+      <button id="tabRegistrar" class="tab">Registrar</button>
+    </div>
+    <input id="inputId" placeholder="Identificador (ej: u001)" />
+    <input id="inputNombre" placeholder="Nombre visible" class="oculto" />
+    <button id="btnAccion">Ingresar</button>
+    <p id="msgError"></p>
+  </section>
+
+  <main id="app" class="oculto">
+    <aside>
+      <p id="yo"></p>
+      <button id="btnSalir" class="secundario">Salir</button>
+
+      <h3>Mis conversaciones</h3>
+      <ul id="listaConversaciones"></ul>
+
+      <h3>Usuarios</h3>
+      <ul id="listaUsuarios"></ul>
+
+      <h3>Salas disponibles</h3>
+      <ul id="listaSalas"></ul>
+      <button id="btnNuevaSala">+ Crear sala</button>
+    </aside>
+
+    <section id="chat">
+      <h2 id="tituloChat">Selecciona un chat</h2>
+      <p id="participantes"></p>
+      <div id="mensajes"></div>
+      <div id="barra">
+        <input id="inputMensaje" placeholder="Escribe un mensaje..." disabled />
+        <button id="btnEnviar" disabled>Enviar</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="logica.js"></script>
+</body>
+</html>
