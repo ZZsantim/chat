@@ -9,39 +9,56 @@
 </head>
 <body>
   <section id="login">
-    <h1>Chat Firestore</h1>
+    <h1>💬 Chat Firestore</h1>
+    <p class="ayuda">Bases de Datos 2 · Taller streams</p>
     <div class="tabs">
       <button id="tabIngresar" class="tab activa">Ingresar</button>
       <button id="tabRegistrar" class="tab">Registrar</button>
     </div>
-    <input id="inputId" placeholder="Identificador (ej: u001)" />
-    <input id="inputNombre" placeholder="Nombre visible" class="oculto" />
+    <input id="inputId" placeholder="Identificador (ej: U060)" autocomplete="off" />
+    <input id="inputNombre" placeholder="Nombre visible" class="oculto" autocomplete="off" />
     <button id="btnAccion">Ingresar</button>
     <p id="msgError"></p>
   </section>
 
   <main id="app" class="oculto">
     <aside>
-      <p id="yo"></p>
-      <button id="btnSalir" class="secundario">Salir</button>
+      <div id="perfil">
+        <span id="avatarYo" class="avatar"></span>
+        <div class="texto">
+          <strong id="yo"></strong>
+          <small id="yoId"></small>
+        </div>
+        <button id="btnSalir" class="secundario">Salir</button>
+      </div>
 
       <h3>Mis conversaciones</h3>
       <ul id="listaConversaciones"></ul>
 
       <h3>Usuarios</h3>
+      <input id="buscarUsuario" placeholder="Buscar por nombre o ID…" autocomplete="off" />
       <ul id="listaUsuarios"></ul>
 
       <h3>Salas disponibles</h3>
       <ul id="listaSalas"></ul>
-      <button id="btnNuevaSala">+ Crear sala</button>
+      <div class="fila">
+        <input id="inputSala" placeholder="Nombre de la nueva sala" autocomplete="off" />
+        <button id="btnNuevaSala">Crear</button>
+      </div>
+      <p id="msgSala"></p>
     </aside>
 
     <section id="chat">
-      <h2 id="tituloChat">Selecciona un chat</h2>
-      <p id="participantes"></p>
+      <header>
+        <div>
+          <h2 id="tituloChat">Selecciona un chat</h2>
+          <p id="participantes"></p>
+        </div>
+        <button id="btnSalirSala" class="secundario oculto">Salir de la sala</button>
+      </header>
       <div id="mensajes"></div>
       <div id="barra">
-        <input id="inputMensaje" placeholder="Escribe un mensaje..." disabled />
+        <input id="inputMensaje" placeholder="Escribe un mensaje..." maxlength="1000" disabled />
         <button id="btnEnviar" disabled>Enviar</button>
       </div>
     </section>
