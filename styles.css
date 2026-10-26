@@ -6,6 +6,7 @@
 body {
   margin: 0;
   background: #f0f2f5;
+  color: #222;
 }
 
 .oculto {
@@ -16,6 +17,12 @@ input {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
+  font-size: 14px;
+}
+
+input:focus {
+  outline: 2px solid #0b7a75;
+  border-color: transparent;
 }
 
 button {
@@ -25,6 +32,10 @@ button {
   background: #0b7a75;
   color: #fff;
   cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #096560;
 }
 
 button:disabled {
@@ -37,15 +48,30 @@ button.secundario {
   background: #888;
 }
 
+button.secundario:hover {
+  background: #666;
+}
+
 #login {
   display: flex;
-  max-width: 320px;
+  max-width: 340px;
   margin: 80px auto;
   padding: 24px;
   flex-direction: column;
   gap: 12px;
   border-radius: 12px;
   background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+#login h1 {
+  margin: 0;
+}
+
+.ayuda {
+  margin: -6px 0 4px;
+  color: #777;
+  font-size: 13px;
 }
 
 .tabs {
@@ -64,10 +90,12 @@ button.secundario {
   color: #fff;
 }
 
-#msgError {
+#msgError,
+#msgSala {
   min-height: 1em;
   margin: 0;
   color: #c0392b;
+  font-size: 13px;
 }
 
 #app {
@@ -76,22 +104,69 @@ button.secundario {
 }
 
 aside {
-  width: 290px;
+  width: 300px;
   padding: 16px;
+  flex-shrink: 0;
   overflow-y: auto;
   border-right: 1px solid #ddd;
   background: #fff;
+}
+
+#perfil {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.avatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: #0b7a75;
+  color: #fff;
+  font-weight: bold;
+}
+
+.texto {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.texto > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.texto small {
+  color: #888;
+  font-size: 12px;
 }
 
 aside h3 {
   margin: 16px 0 6px;
   color: #666;
   font-size: 13px;
+  text-transform: uppercase;
+}
+
+aside > input {
+  width: 100%;
+  margin-bottom: 6px;
 }
 
 aside ul {
+  max-height: 260px;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
   list-style: none;
 }
 
@@ -109,14 +184,43 @@ aside li.activo {
   background: #e6f2f1;
 }
 
-#btnNuevaSala {
-  width: 100%;
+aside li.vacio {
+  color: #999;
+  font-size: 13px;
+  cursor: default;
+}
+
+aside li.vacio:hover {
+  background: none;
+}
+
+aside li.nuevo .texto span {
+  font-weight: bold;
+}
+
+.badge {
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #e67e22;
+  color: #fff;
+  font-size: 11px;
+}
+
+.fila {
+  display: flex;
+  gap: 6px;
   margin-top: 8px;
+}
+
+.fila input {
+  min-width: 0;
+  flex: 1;
 }
 
 .punto {
   width: 10px;
   height: 10px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #aaa;
 }
@@ -133,12 +237,21 @@ aside li.activo {
   flex-direction: column;
 }
 
+#chat header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
 #chat h2 {
   margin: 0;
 }
 
 #participantes {
-  margin: 4px 0 8px;
+  margin: 4px 0 0;
   color: #666;
   font-size: 13px;
 }
@@ -152,23 +265,40 @@ aside li.activo {
   gap: 6px;
 }
 
+#mensajes .vacio {
+  margin: auto;
+  color: #999;
+}
+
 .msg {
   max-width: 70%;
   padding: 8px 12px;
   align-self: flex-start;
-  border-radius: 12px;
+  border-radius: 12px 12px 12px 2px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  overflow-wrap: anywhere;
 }
 
 .msg.propio {
   align-self: flex-end;
+  border-radius: 12px 12px 2px 12px;
   background: #d9f2ef;
 }
 
-.msg small {
+.msg .quien {
   display: block;
-  color: #777;
+  color: #0b7a75;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.msg .hora {
+  display: block;
+  margin-top: 2px;
+  color: #888;
   font-size: 11px;
+  text-align: right;
 }
 
 #barra {
@@ -178,4 +308,35 @@ aside li.activo {
 
 #barra input {
   flex: 1;
+}
+
+@media (max-width: 900px) {
+  aside {
+    width: 240px;
+  }
+
+  .msg {
+    max-width: 85%;
+  }
+}
+
+@media (max-width: 520px) {
+  #app {
+    height: auto;
+    flex-direction: column;
+  }
+
+  aside {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  #chat {
+    height: 80vh;
+  }
+
+  .msg {
+    max-width: 85%;
+  }
 }

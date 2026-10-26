@@ -1,0 +1,66 @@
+rules_version = '2';
+
+// Reglas propuestas para el taller. Como no se usa Firebase Authentication,
+// no pueden comprobar QUIÉN escribe; solo validan la FORMA de los datos para
+// que la base no quede con documentos inconsistentes.
+// Se publican desde la consola de Firebase (Firestore > Reglas).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{uid} {
+      allow read: if true;
+      // Registro: nombre visible obligatorio y fechas puestas por el servidor
+      allow create: if request.resource.data.nombre is string
+        && request.resource.data.nombre.size() > 0
+        && request.resource.data.nombre.size() <= 40
+        && request.resource.data.estado in ['online', 'offline']
+        && request.resource.data.lastSeen == request.time;
+      // Presencia: solo se pueden cambiar estado y lastSeen
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['estado', 'lastSeen'])
+        && request.resource.data.estado in ['online', 'offline']
+        && request.resource.data.lastSeen == request.time;
+      allow delete: if false;
+    }
+
+    match /conversaciones/{cid} {
+      allow read: if true;
+
+      // Privada: exactamente 2 participantes, en orden, y el ID debe ser
+      // "<menor>_<mayor>". Así es imposible crear un duplicado con otro ID.
+      // Grupo: la crea un único participante (su creador).
+      allow create: if (
+          request.resource.data.tipo == 'privada'
+          && request.resource.data.participantes.size() == 2
+          && request.resource.data.participantes[0] < request.resource.data.participantes[1]
+          && cid == request.resource.data.participantes[0] + '_' + request.resource.data.participantes[1]
+        ) || (
+          request.resource.data.tipo == 'grupo'
+          && request.resource.data.nombre is string
+          && request.resource.data.nombre.size() > 0
+          && request.resource.data.nombre.size() <= 40
+          && request.resource.data.participantes == [request.resource.data.creadaPor]
+        );
+
+      // Resumen del último mensaje, o unirse/salir de una sala
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['ultimoMensaje', 'ultimoEmisorId', 'actualizadaEn'])
+        || (resource.data.tipo == 'grupo'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['participantes']));
+      allow delete: if false;
+
+      match /mensajes/{mid} {
+        allow read: if true;
+        // Texto no vacío, hora del servidor y el emisor debe ser participante
+        allow create: if request.resource.data.texto is string
+          && request.resource.data.texto.size() > 0
+          && request.resource.data.texto.size() <= 1000
+          && request.resource.data.creadoEn == request.time
+          && request.resource.data.emisorId in
+            get(/databases/$(database)/documents/conversaciones/$(cid)).data.participantes;
+        // Los mensajes no se editan ni se borran
+        allow update, delete: if false;
+      }
+    }
+  }
+}
