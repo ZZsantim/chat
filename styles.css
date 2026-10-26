@@ -310,7 +310,17 @@ aside li.nuevo .texto span {
   flex: 1;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
+  aside {
+    width: 240px;
+  }
+
+  .msg {
+    max-width: 85%;
+  }
+}
+
+@media (max-width: 520px) {
   #app {
     height: auto;
     flex-direction: column;

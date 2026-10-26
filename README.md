@@ -3,6 +3,12 @@
 Taller Streams · Bases de Datos 2 · Universidad de La Salle
 Alternativa elegida: **B. Chat web con HTML, CSS y JavaScript** (SDK modular de Firebase 12).
 
+**Integrantes**
+- Santiago Fonseca
+- Leonardo López
+- Jacobo Caballero
+- Camilo López
+
 ## Cómo ejecutarlo
 
 La página usa módulos ES, así que necesita un servidor local (no basta con abrir el archivo).
@@ -21,6 +27,7 @@ o la extensión **Live Server** de VS Code. Luego abrir `http://localhost:5500`.
 | `logica.js` | Lógica de la aplicación (equivale al `app.js` del enunciado) |
 | `firebase.js` | Inicialización de Firebase y exportación de `db` |
 | `firestore.rules` | Reglas de seguridad propuestas |
+| `evidencias/` | Capturas de las pruebas funcionales |
 
 ---
 
@@ -142,21 +149,98 @@ Debe publicarlas el dueño del proyecto Firebase (Firestore → Reglas).
 
 ---
 
-## 5. Pruebas funcionales
+## 5. Ventajas y limitaciones del modelo de datos
 
-Probar con **dos ventanas** (una normal y otra en incógnito), cada una con un usuario distinto.
+**Ventajas**
+- **Sin duplicados por diseño:** el ID determinista `U001_U002` hace que la propia base impida dos chats privados para la misma pareja, sin tener que buscar y comparar.
+- **Consultas simples y sin índices compuestos:** cada pantalla se resuelve con una sola consulta (`array-contains`, `==` u `orderBy`).
+- **Escala con el número de mensajes:** al estar en subcolección, abrir la lista de chats no descarga mensajes, y un chat largo no choca con el límite de 1 MiB por documento.
+- **Tiempo real barato:** solo se escucha la subcolección del chat abierto; el resto se resume con `ultimoMensaje`/`actualizadaEn`.
+- **Un mismo modelo para privados y grupos:** solo cambia `tipo` y el tamaño de `participantes`.
 
-| ID | Prueba | Pasos | Resultado esperado | Resultado obtenido | Evidencia |
-|---|---|---|---|---|---|
-| P1 | Registrar dos usuarios | Registrar `U060 - Ana` y `U061 - Carlos` | Ambos aparecen en `usuarios` con IDs únicos | | |
-| P1b | Registrar ID repetido | Registrar `u060` (minúscula) | Se rechaza: "El identificador U060 ya existe" | | |
-| P2 | Consultar usuarios | Entrar como Ana | La lista muestra a los demás, no a Ana; Carlos con punto verde | | |
-| P3 | Seleccionar destinatario | Ana hace clic en Carlos | Se abre la conversación `U060_U061` | | |
-| P3b | No duplicar | Carlos hace clic en Ana | Abre la **misma** conversación `U060_U061` (ver consola de Firebase: un solo documento) | | |
-| P4 | Enviar mensaje | Ana escribe "Hola" | Se guarda en `conversaciones/U060_U061/mensajes` con `emisorId`, `texto`, `creadoEn` | | |
-| P5 | Mensaje desde otra instancia | Carlos responde desde la otra ventana | Ana lo ve sin recargar, con hora | | |
-| P6 | Mensaje vacío | Enviar con el campo vacío o solo espacios | Se rechaza con un aviso, no se guarda nada | | |
-| P7 | Cambiar de conversación | Abrir otro chat y volver | No se mezclan mensajes de chats distintos | | |
-| P8 | Presencia | Cerrar la ventana de Carlos sin pulsar Salir | En ~60 s su punto pasa a gris en la ventana de Ana | | |
+**Limitaciones**
+- **Datos copiados:** `emisorNombre` y `ultimoMensaje` son copias; si un usuario cambia su nombre, los mensajes viejos conservan el anterior.
+- **Grupos grandes:** `participantes` es un array dentro del documento; para salas de miles de personas convendría una subcolección de miembros.
+- **Historial completo:** el listener carga todos los mensajes del chat; con chats muy largos habría que paginar con `limit()`.
+- **Sin autenticación:** el ID no prueba la identidad; cualquiera que lo conozca puede entrar como ese usuario.
+- **Presencia aproximada:** depende de latidos del cliente (ver sección 3).
+- **Datos heredados:** quedaron en la base usuarios de pruebas anteriores con ID aleatorio (`addDoc`) o en minúsculas (`u001` y `U001`), y salas con ID aleatorio, creados antes de las correcciones.
 
-En la columna *Evidencia* va la captura de pantalla (app + consola de Firestore).
+---
+
+## 6. Pruebas funcionales
+
+Se probó el 26/10/2026 con **dos ventanas** del navegador (una normal y otra privada), una con **ANA (`U060`)** y otra con **CARLOS (`U061`)**, ejecutando la app en `http://localhost:5500`. Las capturas están en la carpeta [`evidencias/`](evidencias/).
+
+| ID | Prueba | Resultado esperado | Resultado obtenido | Estado |
+|---|---|---|---|---|
+| P1 | Registrar dos usuarios | Ambos aparecen con identificadores únicos | Se registraron `U060 - ANA` y `U061 - CARLOS`; cada ventana muestra su usuario | ✅ |
+| P1b | Registrar un ID que ya existe | Se rechaza | Al registrar `U060 - CARLOS`: "El identificador U060 ya existe. Usa Ingresar." | ✅ |
+| P2 | Consultar usuarios disponibles | Se muestran usuarios diferentes del actual | Ana no aparece en su propia lista; Carlos aparece con punto verde "en línea" (y viceversa) | ✅ |
+| P3 | Seleccionar un destinatario | Se abre la conversación correcta | Ana busca "CAR", hace clic en CARLOS y se abre el chat "CARLOS · U061 · en línea" | ✅ |
+| P3b | El otro usuario abre el mismo chat | No se crea una conversación nueva | En la lista de Carlos aparece "ANA" sin crear otra: en Firestore existe un solo documento `U060_U061` | ✅ |
+| P4 | Enviar un mensaje | Queda almacenado en Firestore | Ana envía "HOLA"; se guarda en `conversaciones/U060_U061/mensajes` (ver abajo) | ✅ |
+| P5 | Recibir desde otra instancia | Llega sin actualizar manualmente | El "HOLA" aparece en la ventana de Carlos al instante, con el nombre ANA y la hora 15:51 | ✅ |
+| P6 | Enviar un mensaje vacío | El sistema lo rechaza | Alerta "No puedes enviar un mensaje vacío."; no se guardó nada | ✅ |
+| P7 | Cambiar de conversación | No se mezclan los mensajes | Ana abre el chat con Carolina (`U058`): aparece vacío, sin el "HOLA" del chat con Carlos | ✅ |
+| P8 | Presencia | El usuario que sale se ve desconectado | Carlos cierra sesión; en la ventana de Ana su punto pasa a gris con "visto hace 0 min" | ✅ |
+
+### Evidencias
+
+**P1 y P2 – Registro de dos usuarios y lista de usuarios disponibles**
+![P1 y P2](evidencias/P1-P2-registro-y-usuarios.png)
+
+**P1b – Identificador repetido rechazado**
+![P1b](evidencias/P1b-id-repetido.png)
+
+**P3 – Ana selecciona a Carlos y se abre la conversación**
+![P3](evidencias/P3-ana-abre-chat.png)
+
+**P3b – En la ventana de Carlos aparece la misma conversación con Ana**
+![P3b](evidencias/P3b-carlos-misma-conversacion.png)
+
+**P4 y P5 – Mensaje enviado por Ana y recibido por Carlos en tiempo real**
+![P4 y P5](evidencias/P4-P5-mensaje-en-tiempo-real.png)
+
+**P6 – Mensaje vacío rechazado**
+![P6](evidencias/P6-mensaje-vacio.png)
+
+**P7 – Al cambiar de conversación no se mezclan los mensajes**
+![P7](evidencias/P7-cambio-de-conversacion.png)
+
+**P8 – Carlos sale y Ana lo ve desconectado**
+![P8](evidencias/P8-presencia.png)
+
+### Datos guardados en Firestore (P1, P3b y P4)
+
+Consulta hecha desde la aplicación después de las pruebas:
+
+```
+usuarios/U060  ->  { nombre: "ANA",    estado: "online"  }
+usuarios/U061  ->  { nombre: "CARLOS", estado: "offline" }   <- marcado al pulsar Salir
+
+conversaciones donde participa U060 (where participantes array-contains "U060"):
+    U058_U060   ["U058", "U060"]     <- chat con Carolina (P7)
+    U060_U061   ["U060", "U061"]     <- un solo chat con Carlos (P3b)
+
+conversaciones/U060_U061
+    tipo: "privada"
+    participantes: ["U060", "U061"]
+    creadaEn:      2026-10-26 15:50:07 (hora del servidor)
+    actualizadaEn: 2026-10-26 15:51:31
+    ultimoMensaje: "HOLA"
+    ultimoEmisorId: "U060"
+
+conversaciones/U060_U061/mensajes/EtC1Wmv4FNtpHMYTYDYb
+    emisorId:     "U060"
+    emisorNombre: "ANA"
+    texto:        "HOLA"
+    creadoEn:     2026-10-26 15:51:31 (hora del servidor)
+```
+
+### Cómo repetir las pruebas
+1. Ejecutar `python -m http.server 5500` en la carpeta del proyecto.
+2. Abrir `http://localhost:5500` en una ventana normal y en una privada.
+3. Registrar un usuario distinto en cada una y seguir la tabla anterior.
+
+> P8 se hizo pulsando **Salir** (cierre normal). Si la ventana se cierra de forma inesperada, el estado no se escribe y el punto pasa a gris cuando `lastSeen` supera el umbral de 60 s (ver sección 3).
